@@ -106,7 +106,8 @@ static void ARNSwizzReplaceRespondsToSelector(Class class) {
         Method method = arn_swizzGetImmediateInstanceMethod(class, selector);
         if (method != NULL && method_getImplementation(method) == _objc_msgForward) {
             SEL aliasSelector = ARNSwizzAliasForSelector(selector);
-            if (objc_getAssociatedObject(self, aliasSelector) != nil) {
+            Method aliasMethod = class_getInstanceMethod(class, aliasSelector);
+            if (method_getImplementation(aliasMethod) != NULL) {
                 return YES;
             }
         }
@@ -149,8 +150,9 @@ Method arn_swizzGetImmediateInstanceMethod(Class aClass, SEL aSelector) {
     unsigned methodCount = 0;
     Method *methods = class_copyMethodList(aClass, &methodCount);
     Method foundMethod = NULL;
-    
+    //NSLog(@"aSelector : %@", NSStringFromSelector(aSelector));
     for (unsigned methodIndex = 0; methodIndex < methodCount; ++methodIndex) {
+        //NSLog(@"%@", NSStringFromSelector(method_getName(methods[methodIndex])));
         if (method_getName(methods[methodIndex]) == aSelector) {
             foundMethod = methods[methodIndex];
             break;
@@ -240,6 +242,8 @@ static void ARNSiwzzDealloc(Class classToSwizzle) {
                     if (kvoClass) {
                         objc_disposeClassPair(kvoClass);
                     }
+                    
+                    
                     objc_disposeClassPair(subclass);
                 }
             }
@@ -275,6 +279,10 @@ static void ARNSiwzzDealloc(Class classToSwizzle) {
             IMP originalIMP = method_getImplementation(originalMethod);
             
             class_replaceMethod(dynamicSubClass, selector, originalIMP, method_getTypeEncoding(originalMethod));
+            
+            SEL aliasSelector = ARNSwizzAliasForSelector(selector);
+            Method aliasMethod = class_getInstanceMethod(dynamicSubClass, aliasSelector);
+            imp_removeBlock(method_getImplementation(aliasMethod));
         }
     }
 }

@@ -18,10 +18,10 @@
 
 @implementation ASBViewController
 
-- (void)viewDidLoad
+- (instancetype)initWithCoder:(NSCoder *)aDecoder
 {
-    [super viewDidLoad];
-	
+    if (!(self = [super initWithCoder:aDecoder])) { return nil; }
+    
     [self arn_swizzRespondsToSelector:@selector(tableView:cellForRowAtIndexPath:) fromProtocol:@protocol(UITableViewDataSource) usingBlock:^UITableViewCell *(id obj, UITableView *tableView, NSIndexPath *indexPath) {
         static NSString *cellIdentifier = @"cellIdentifier";
         UITableViewCell *cell           = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
@@ -35,12 +35,18 @@
         
         return cell;
     }];
+    
+    return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
 }
 
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
 }
 
 - (IBAction)tapOriginButton:(id)sender
@@ -50,8 +56,6 @@
 
 - (IBAction)tapSwizzButton:(id)sender
 {
-    UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"test" message:@"Swizz" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"OK", nil];
-    
     __weak typeof(self) weakSelf = self;
     [self arn_swizzRespondsToSelector:@selector(alertView:clickedButtonAtIndex:) fromProtocol:@protocol(UIAlertViewDelegate) usingBlock:^(id obj, UIAlertView *alertView, NSInteger buttonIndex) {
         NSLog(@"obj : %@", obj);
@@ -71,13 +75,13 @@
         [[[UIAlertView alloc] initWithTitle:@"test" message:@"Swizz Remove" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"OK", nil] show];
         
     }];
-    [alertView show];
+    [[[UIAlertView alloc] initWithTitle:@"test" message:@"Swizz" delegate:self cancelButtonTitle:@"Cancel" otherButtonTitles:@"OK", nil] show];
 }
 
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
-{
-    NSLog(@"Call Original clickedButtonAtIndex");
-}
+//- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+//{
+//    NSLog(@"Call Original clickedButtonAtIndex");
+//}
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
@@ -89,10 +93,9 @@
     return 30;
 }
 
-
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    return nil;
-}
+//- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+//{
+//    return nil;
+//}
 
 @end
